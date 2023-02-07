@@ -2,8 +2,12 @@ package main
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -24,62 +28,62 @@ type Pokemon struct {
 }
 
 func main() {
-	// var baseEndpoint string = "https://pokeapi.co/api/v2/pokemon/%d"
-	// var parsedPokemon = []Pokemon{}
-	// for idx := 0; idx < 1000; idx++ {
-	// 	currentEndpoint := fmt.Sprintf(baseEndpoint, idx+1)
-	// 	response, err := http.Get(currentEndpoint)
-	// 	if err != nil {
-	// 		fmt.Println(err.Error())
-	// 		os.Exit(1)
-	// 	}
-	// 	responseData, err := ioutil.ReadAll(response.Body)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
+	var baseEndpoint string = "https://pokeapi.co/api/v2/pokemon/%d"
+	var parsedPokemon = []Pokemon{}
+	for idx := 0; idx < 1000; idx++ {
+		currentEndpoint := fmt.Sprintf(baseEndpoint, idx+1)
+		response, err := http.Get(currentEndpoint)
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		responseData, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	// 	var responseJson map[string]interface{}
+		var responseJson map[string]interface{}
 
-	// 	err = json.Unmarshal([]byte(responseData), &responseJson)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	var currentPokemon = Pokemon{}
-	// 	keysOfInterest := []string{"name", "order", "height", "weight"}
-	// 	for key, value := range responseJson {
-	// 		if isItemInList(key, keysOfInterest) {
-	// 			switch key {
-	// 			case "name":
-	// 				currentPokemon.name = fmt.Sprintf("%v", value)
-	// 			case "order":
-	// 				currentPokemon.order = fmt.Sprintf("%v", value)
-	// 			case "height":
-	// 				currentPokemon.height = fmt.Sprintf("%v", value)
-	// 			case "weight":
-	// 				currentPokemon.weight = fmt.Sprintf("%v", value)
-	// 			}
+		err = json.Unmarshal([]byte(responseData), &responseJson)
+		if err != nil {
+			log.Fatal(err)
+		}
+		var currentPokemon = Pokemon{}
+		keysOfInterest := []string{"name", "order", "height", "weight"}
+		for key, value := range responseJson {
+			if isItemInList(key, keysOfInterest) {
+				switch key {
+				case "name":
+					currentPokemon.name = fmt.Sprintf("%v", value)
+				case "order":
+					currentPokemon.order = fmt.Sprintf("%v", value)
+				case "height":
+					currentPokemon.height = fmt.Sprintf("%v", value)
+				case "weight":
+					currentPokemon.weight = fmt.Sprintf("%v", value)
+				}
 
-	// 		}
-	// 	}
-	// 	parsedPokemon = append(parsedPokemon, currentPokemon)
-	// }
+			}
+		}
+		parsedPokemon = append(parsedPokemon, currentPokemon)
+	}
 
 	// // Iterate over the created pokemon List and write to CSV file
 	const outputCSVFile string = "data/pokemon_details.csv"
-	// csvFile, err := os.Create(outputCSVFile)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer csvFile.Close()
-	// csvWriter := csv.NewWriter(csvFile)
+	csvFile, err := os.Create(outputCSVFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer csvFile.Close()
+	csvWriter := csv.NewWriter(csvFile)
 
-	// csvWriter.Write([]string{"Name", "Order", "Height", "Weight"})
-	// for i := 0; i < len(parsedPokemon); i++ {
-	// 	var row = []string{parsedPokemon[i].name, parsedPokemon[i].order,
-	// 		parsedPokemon[i].weight, parsedPokemon[i].height}
-	// 	_ = csvWriter.Write(row)
-	// }
-	// csvWriter.Flush()
+	csvWriter.Write([]string{"Name", "Order", "Height", "Weight"})
+	for i := 0; i < len(parsedPokemon); i++ {
+		var row = []string{parsedPokemon[i].name, parsedPokemon[i].order,
+			parsedPokemon[i].weight, parsedPokemon[i].height}
+		_ = csvWriter.Write(row)
+	}
+	csvWriter.Flush()
 
 	// Read input CSV File and filter where height < 10 and weight between 100 and 175
 	csvFile, err := os.Open(outputCSVFile)
